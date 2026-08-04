@@ -36,7 +36,7 @@ export class UsersService {
     return users.map((user) => this.toSafeUser(user));
   }
 
-  async findOne(userid: number): Promise<SafeUser> {
+  async findOne(userid: string): Promise<SafeUser> {
     const user = await this.usersRepository.findOne({ where: { userid } });
     if (!user) {
       throw new NotFoundException(`User with ID ${userid} not found`);
@@ -49,24 +49,29 @@ export class UsersService {
   }
 
   async update(
-    userid: number,
+    userid: string,
     updateUserDto: UpdateUserDto,
   ): Promise<SafeUser> {
     const user = await this.usersRepository.findOne({ where: { userid } });
     if (!user) {
       throw new NotFoundException(`User with ID ${userid} not found`);
     }
+
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
     Object.assign(user, updateUserDto);
     const saved = await this.usersRepository.save(user);
     return this.toSafeUser(saved);
   }
 
-  async remove(userid: number): Promise<SafeUser> {
+  async remove(userid: string): Promise<SafeUser> {
     const user = await this.usersRepository.findOne({ where: { userid } });
     if (!user) {
       throw new NotFoundException(`User with ID ${userid} not found`);
     }
-    const removed = await this.usersRepository.remove(user);
-    return this.toSafeUser(removed);
+    await this.usersRepository.softRemove(user);
+    return this.toSafeUser(user);
   }
 }
