@@ -14,6 +14,8 @@ import { ProvincesService } from './provinces.service';
 import { CreateProvinceDto } from './dto/create-province.dto';
 import { UpdateProvinceDto } from './dto/update-province.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UserState } from 'src/users/dto/create-user.dto';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @Controller('provinces')
 @UseGuards(JwtAuthGuard)
@@ -22,6 +24,7 @@ export class ProvincesController {
 
   @Post()
   @HttpCode(201)
+  @Roles(UserState.ADMIN)
   create(@Body() createProvinceDto: CreateProvinceDto) {
     return this.provincesService.create(createProvinceDto);
   }
@@ -40,6 +43,7 @@ export class ProvincesController {
 
   @Patch(':provinceid')
   @HttpCode(200)
+  @Roles(UserState.ADMIN)
   update(
     @Param('provinceid', ParseUUIDPipe) provinceid: string,
     @Body() updateProvinceDto: UpdateProvinceDto,
@@ -49,12 +53,14 @@ export class ProvincesController {
 
   @Patch(':provinceid/restore')
   @HttpCode(200)
+  @Roles(UserState.ADMIN)
   restore(@Param('provinceid', ParseUUIDPipe) provinceid: string) {
     return this.provincesService.restore(provinceid);
   }
 
   @Delete(':provinceid')
   @HttpCode(200)
+  @Roles(UserState.ADMIN)
   remove(@Param('provinceid', ParseUUIDPipe) provinceid: string) {
     return this.provincesService.remove(provinceid);
   }
