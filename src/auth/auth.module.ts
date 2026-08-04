@@ -16,6 +16,7 @@ import type { StringValue } from 'ms';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
+        global: true,
         secret: config.get<string>('JWT_SECRET'),
         signOptions: {
           expiresIn: config.getOrThrow<StringValue>('JWT_EXPIRES_IN'),
