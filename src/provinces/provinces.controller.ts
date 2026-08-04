@@ -47,6 +47,12 @@ export class ProvincesController {
     return this.provincesService.update(provinceid, updateProvinceDto);
   }
 
+  @Patch(':provinceid/restore')
+  @HttpCode(200)
+  restore(@Param('provinceid', ParseUUIDPipe) provinceid: string) {
+    return this.provincesService.restore(provinceid);
+  }
+
   @Delete(':provinceid')
   @HttpCode(200)
   remove(@Param('provinceid', ParseUUIDPipe) provinceid: string) {

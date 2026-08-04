@@ -47,6 +47,12 @@ export class UsersController {
     return this.usersService.update(userid, updateUserDto);
   }
 
+  @Patch(':userid/restore')
+  @HttpCode(200)
+  restore(@Param('userid', ParseUUIDPipe) userid: string) {
+    return this.usersService.restore(userid);
+  }
+
   @Delete(':userid')
   @HttpCode(200)
   remove(@Param('userid', ParseUUIDPipe) userid: string) {

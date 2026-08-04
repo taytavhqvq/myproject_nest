@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsIn, MinLength } from 'class-validator';
+import { IsNotEmpty, IsString, IsIn, MinLength, IsUUID } from 'class-validator';
 import {
   HasLowercase,
   HasUppercase,
@@ -29,4 +29,8 @@ export class CreateUserDto {
     message: 'State must be either Admin or Staff',
   })
   state!: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  provinceId!: string;
 }

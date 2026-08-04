@@ -5,15 +5,20 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class Province {
   @PrimaryGeneratedColumn('uuid')
-  provinceid!: string;
+  provinceId!: string;
 
   @Column()
   name!: string;
+
+  @OneToMany(() => User, (user) => user.province)
+  users!: User[];
 
   @CreateDateColumn()
   createdAt!: Date;

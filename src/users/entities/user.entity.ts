@@ -1,3 +1,4 @@
+import { Province } from 'src/provinces/entities/province.entity';
 import {
   Entity,
   Column,
@@ -5,12 +6,14 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  userid!: string;
+  userId!: string;
 
   @Column()
   username!: string;
@@ -20,6 +23,10 @@ export class User {
 
   @Column()
   state!: string;
+
+  @ManyToOne(() => Province, (province) => province.users, { nullable: true })
+  @JoinColumn({ name: 'provinceid' })
+  province!: Province;
 
   @CreateDateColumn()
   createdAt!: Date;
