@@ -7,12 +7,15 @@ import {
   Param,
   Delete,
   HttpCode,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('users')
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -44,7 +47,7 @@ export class UsersController {
   }
 
   @Delete(':userid')
-  @HttpCode(204)
+  @HttpCode(200)
   remove(@Param('userid') userid: number) {
     return this.usersService.remove(userid);
   }

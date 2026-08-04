@@ -34,7 +34,6 @@ export class GeneralExceptionFilter implements ExceptionFilter {
       });
     }
 
-    // Error ที่ไม่คาดคิด (database error, uncaught exception, etc.)
     console.error(exception);
 
     response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({

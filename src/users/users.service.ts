@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+
+type SafeUser = Omit<User, 'password'>;
 
 @Injectable()
 export class UsersService {
@@ -12,31 +15,58 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.usersRepository.create(createUserDto);
-    return this.usersRepository.save(user);
+  private toSafeUser(user: User): SafeUser {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...safeUser } = user;
+    return safeUser;
   }
 
-  findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+  async create(createUserDto: CreateUserDto): Promise<SafeUser> {
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const user = this.usersRepository.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
+    const saved = await this.usersRepository.save(user);
+    return this.toSafeUser(saved);
   }
 
-  async findOne(userid: number): Promise<User> {
+  async findAll(): Promise<SafeUser[]> {
+    const users = await this.usersRepository.find();
+    return users.map((user) => this.toSafeUser(user));
+  }
+
+  async findOne(userid: number): Promise<SafeUser> {
     const user = await this.usersRepository.findOne({ where: { userid } });
     if (!user) {
-      throw new Error(`User with ID ${userid} not found`);
+      throw new NotFoundException(`User with ID ${userid} not found`);
     }
-    return user;
+    return this.toSafeUser(user);
   }
 
-  async update(userid: number, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(userid);
+  findByUsername(username: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { username } });
+  }
+
+  async update(
+    userid: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<SafeUser> {
+    const user = await this.usersRepository.findOne({ where: { userid } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userid} not found`);
+    }
     Object.assign(user, updateUserDto);
-    return this.usersRepository.save(user);
+    const saved = await this.usersRepository.save(user);
+    return this.toSafeUser(saved);
   }
 
-  async remove(userid: number): Promise<User> {
-    const user = await this.findOne(userid);
-    return this.usersRepository.remove(user);
+  async remove(userid: number): Promise<SafeUser> {
+    const user = await this.usersRepository.findOne({ where: { userid } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userid} not found`);
+    }
+    const removed = await this.usersRepository.remove(user);
+    return this.toSafeUser(removed);
   }
 }
